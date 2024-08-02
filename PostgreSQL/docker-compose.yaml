@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+  postgres:
+    container_name: postgredb
+    image: postgres:17beta2
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=MyDB
+      - TZ=Asia/Kolkata
+    ports:
+      - "54321:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: ["postgres", "-c", "timezone=Asia/Kolkata"]
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_CHECK_DEFAULT_DELIVERABILITY=False
+    ports:
+      - "5050:80"
+    volumes:
+      - ./config/servers.json:/pgadmin4/servers.json
+      - pgadmin-data:/var/lib/pgadmin
+    healthcheck:
+      test: ["CMD", "wget", "-O", "-", "http://localhost:80/misc/ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  pgdata:
+    name: 'pgdata'
+  pgadmin-data:
+    name: 'pgadmin-data'
